@@ -18,7 +18,7 @@ export default function App() {
     {
       title: "Speech Model",
       desc: "AI converts gestures into natural speech for real-time conversations.",
-      img: "https://images.unsplash.com/photo-1598300055321-4d38b4dc9e4f?auto=format&fit=crop&w=800&q=80",
+      img: "https://static.wixstatic.com/media/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg/v1/fill/w_800,h_800,al_c,q_85,enc_avif,quality_auto/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg",
       price: "$399",
     },
     {
