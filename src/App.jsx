@@ -1,641 +1,303 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-} from "recharts";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef, useState } from "react";
+import { ArrowRight, X, CheckCircle2 } from "lucide-react";
 
 export default function App() {
-  const [slide, setSlide] = useState(0);
-  const [showButton, setShowButton] = useState(false);
-  const containerRef = useRef(null);
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
-  // Auto move from slide 0 → 1
-  useEffect(() => {
-    if (slide === 0) {
-      const timer = setTimeout(() => setSlide(1), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [slide]);
+  const [selectedImg, setSelectedImg] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [showThankYou, setShowThankYou] = useState(false);
 
-  // Show nav buttons on mouse move / click
-  useEffect(() => {
-    let timer;
-    const handleMouseMove = () => {
-      setShowButton(true);
-      clearTimeout(timer);
-      timer = setTimeout(() => setShowButton(false), 2000);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("click", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("click", handleMouseMove);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (e.key === "ArrowRight")
-        setSlide((s) => Math.min(s + 1, slides.length - 1));
-      if (e.key === "ArrowLeft") setSlide((s) => Math.max(s - 1, 0));
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, []);
-
-  // Robust pointer-based swipe (attached to containerRef)
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    let startX = 0;
-    let startY = 0;
-    let lastX = 0;
-    let isDown = false;
-    let isDragging = false;
-
-    const onPointerDown = (e) => {
-      // only left mouse button or touch
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-      isDown = true;
-      isDragging = false;
-      startX = e.clientX;
-      startY = e.clientY;
-      lastX = startX;
-      el.setPointerCapture(e.pointerId);
-    };
-
-    const onPointerMove = (e) => {
-      if (!isDown) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      lastX = e.clientX;
-
-      // If vertical movement is larger than horizontal, treat as scroll => ignore swipe
-      if (!isDragging && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-        // cancel swipe detection for this gesture
-        isDown = false;
-        try {
-          el.releasePointerCapture(e.pointerId);
-        } catch {}
-        return;
-      }
-
-      // mark dragging only when horizontal movement exceeds small threshold
-      if (Math.abs(dx) > 10) isDragging = true;
-    };
-
-    const onPointerUp = (e) => {
-      if (!isDragging) {
-        isDown = false;
-        try {
-          el.releasePointerCapture(e.pointerId);
-        } catch {}
-        return;
-      }
-
-      const diff = e.clientX - startX;
-      const threshold = 80; // px to consider as a swipe
-
-      if (Math.abs(diff) > threshold) {
-        if (diff < 0) {
-          // swipe left -> next
-          setSlide((s) => Math.min(s + 1, slides.length - 1));
-        } else {
-          // swipe right -> prev
-          setSlide((s) => Math.max(s - 1, 0));
-        }
-      }
-
-      isDown = false;
-      isDragging = false;
-      try {
-        el.releasePointerCapture(e.pointerId);
-      } catch {}
-    };
-
-    el.addEventListener("pointerdown", onPointerDown);
-    el.addEventListener("pointermove", onPointerMove);
-    el.addEventListener("pointerup", onPointerUp);
-    el.addEventListener("pointercancel", onPointerUp);
-
-    return () => {
-      el.removeEventListener("pointerdown", onPointerDown);
-      el.removeEventListener("pointermove", onPointerMove);
-      el.removeEventListener("pointerup", onPointerUp);
-      el.removeEventListener("pointercancel", onPointerUp);
-    };
-  }, [/* no slide dependency here on purpose */]);
-
-  const profitData = [
-    { year: 2025, profit: 10 },
-    { year: 2026, profit: 18 },
-    { year: 2027, profit: 25 },
-    { year: 2028, profit: 32 },
-    { year: 2029, profit: 40 },
+  const products = [
+    {
+      title: "Speech Model",
+      desc: "AI converts gestures into natural speech for real-time conversations.",
+      img: "https://static.wixstatic.com/media/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg/v1/fill/w_800,h_800,al_c,q_85,enc_avif,quality_auto/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg",
+      price: "$399",
+    },
+    {
+      title: "Text Display",
+      desc: "Real-time captions appear on the lens using integrated LED micro-display.",
+      img: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRWFq62EiTc-RUCiugdn3b7b6nID-1ZV-ynWcjbYs3bu0aUVKdUpvR2KnSWCrt3jzwwp0I0mwMWf8aH7-agsi3uL1Q2p7Et6PNXFqEwqIW9xywIdPv0dVxpkg",
+      price: "$499",
+    },
+    {
+      title: "Dual Mode",
+      desc: "Combines speech and text interpretation seamlessly in one premium frame.",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtDEyHSOb_k0enzdq8kPP1gOadbDHkdW-h8ZgGKuYAhdSMCbJTPus3Piyk&s=10",
+      price: "$599",
+    },
   ];
 
-  const resourcesData = [
-    { resource: "Developers", count: 50 },
-    { resource: "Clients", count: 80 },
-    { resource: "AI Tools", count: 30 },
-    { resource: "Servers", count: 10 },
-  ];
-
-  // ✨ Particle Background
-  const Particles = () => {
-    const particleCount = window.innerWidth > 768 ? 40 : 20;
-    const particles = Array.from({ length: particleCount });
-    return (
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute rounded-full bg-indigo-400/90"
-            style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-            }}
-            initial={{
-              opacity: 0.7,
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              scale: Math.random() * 1.2 + 0.6,
-            }}
-            animate={{
-              y: [
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight,
-              ],
-              x: [
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-              ],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 14 + Math.random() * 6,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-    );
+  const handleBuy = (product) => {
+    setSelectedProduct(product);
+    setShowModal(true);
   };
 
-  const textVariant = {
-    hidden: { opacity: 0, y: 40 },
-    visible: (i = 1) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.3, duration: 0.8, ease: "easeOut" },
-    }),
+  const handleChat = (msg) => {
+    if (!msg.trim()) return;
+    const newMessage = { sender: "user", text: msg };
+    setChatMessages((prev) => [...prev, newMessage]);
+    setTimeout(() => {
+      const reply = {
+        sender: "bot",
+        text:
+          "I'm Aura 🤖 — your AI assistant! I can help with pricing, shipping, or product info. Try asking: 'Tell me more about Dual Mode'.\n\nDeveloped by Ankit Maan 🚀",
+      };
+      setChatMessages((prev) => [...prev, reply]);
+    }, 700);
   };
-
-  const GlowingLine = () => (
-    <motion.div
-      className="relative w-40 h-1 mt-3 bg-gradient-to-r from-indigo-400 via-blue-500 to-purple-500 rounded-full overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.8, duration: 1 }}
-    >
-      <motion.span
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent"
-        initial={{ x: "-100%" }}
-        animate={{ x: "100%" }}
-        transition={{
-          repeat: Infinity,
-          duration: 2,
-          ease: "linear",
-        }}
-      />
-    </motion.div>
-  );
-
-  const slides = [
-    // 🟣 0 — Let’s Start
-    {
-      content: (
-        <motion.div
-          className="flex flex-col items-center justify-center h-screen w-full bg-gradient-to-b from-indigo-5 to-indigo-100 relative overflow-hidden"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.5 }}
-        >
-          <Particles />
-          <motion.h1
-            className="text-6xl font-extrabold text-indigo-700 mb-6 tracking-wide"
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-          >
-            Let’s Start
-          </motion.h1>
-          <motion.div
-            className="w-32 h-1 bg-indigo-500 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: "8rem" }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-          />
-        </motion.div>
-      ),
-    },
-
-    // 🟣 1 — Hirevo Intro
-    {
-      content: (
-        <motion.div
-          className="flex flex-col items-center justify-center relative px-4 text-center max-w-[95vw] overflow-hidden"
-          initial="hidden"
-          animate="visible"
-        >
-          <Particles />
-          <motion.h1
-            variants={textVariant}
-            className="text-7xl font-extrabold text-indigo-700 mb-2 tracking-tight drop-shadow-sm"
-          >
-            Hirevo
-          </motion.h1>
-          <GlowingLine />
-          <motion.h2
-            variants={textVariant}
-            custom={2}
-            className="text-2xl text-gray-700 mb-8 italic mt-4"
-          >
-            Evolution in Hiring
-          </motion.h2>
-          <motion.p
-            variants={textVariant}
-            custom={3}
-            className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed"
-          >
-            Connecting clients with verified developers for web, app, and AI
-            projects — with transparent pricing, proven skills, and instant
-            collaboration.
-          </motion.p>
-          <motion.div
-            className="mt-10 bg-indigo-600 px-8 py-3 rounded-full text-white text-lg shadow-lg cursor-pointer hover:bg-indigo-700 transition-all"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.8 }}
-            onClick={() => setSlide((s) => Math.min(s + 1, slides.length - 1))}
-          >
-            Enter App →
-          </motion.div>
-        </motion.div>
-      ),
-    },
-
-    // 🟣 2 — Intro & Management
-    {
-      title: "Intro & Management",
-      content: (
-        <motion.p
-          variants={textVariant}
-          initial="hidden"
-          animate="visible"
-          className="text-lg text-gray-600 max-w-xl mx-auto px-4 text-center"
-        >
-          Managed by passionate developers, Hirevo bridges the gap between
-          clients and coders through trust, fair pay, and verified collaboration.
-        </motion.p>
-      ),
-    },
-
-    // 🟣 3 — Business Proposal
-    {
-      title: "Business Proposal",
-      content: (
-        <motion.p
-          variants={textVariant}
-          initial="hidden"
-          animate="visible"
-          className="text-lg text-gray-600 max-w-xl mx-auto px-4 text-center"
-        >
-          A transparent hiring platform — where clients post projects, developers
-          apply, and AI matches them based on skill, cost, and delivery history.
-        </motion.p>
-      ),
-    },
-
-    // 🟣 4 — Costing & Budget
-    {
-      title: "Costing & Budget",
-      content: (
-        <motion.div variants={textVariant} initial="hidden" animate="visible">
-          <p className="text-lg text-gray-600 mb-6 max-w-xl mx-auto px-4 text-center">
-            Our cost structure covers infrastructure, developer verification,
-            and marketing. Revenue is earned via small service fees.
-          </p>
-          <ResponsiveContainer width="90%" height={250} className="mx-auto">
-            <BarChart data={resourcesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="resource" />
-              <YAxis />
-              <Tooltip />
-              <defs>
-                <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.8} />
-                </linearGradient>
-              </defs>
-
-              <Bar
-                dataKey="count"
-                fill="url(#blueGradient)"
-                radius={10}
-                animationBegin={0}
-                animationDuration={1500}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.div>
-      ),
-    },
-
-    // 🟣 5 — Profit Ratio
-    {
-      title: "Profit Ratio",
-      content: (
-        <motion.div variants={textVariant} initial="hidden" animate="visible">
-          <p className="text-lg text-gray-600 mb-6 max-w-xl mx-auto px-4 text-center">
-            With strong adoption, Hirevo’s profitability grows year by year —
-            reflecting trust, returning clients, and scalable systems.
-          </p>
-          <ResponsiveContainer width="90%" height={250}>
-            <LineChart data={profitData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="year" />
-              <YAxis />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="profit"
-                stroke="#6366F1"
-                strokeWidth={3}
-                dot={{ r: 6 }}
-                activeDot={{ r: 8 }}
-                animationDuration={1500}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </motion.div>
-      ),
-    },
-
-    // 🟣 6 — Risk Management
-    {
-      title: "Risk Management",
-      content: (
-        <motion.div
-          variants={textVariant}
-          initial="hidden"
-          animate="visible"
-          className="max-w-xl mx-auto text-gray-700 px-4 text-center relative"
-        >
-          <p className="text-lg mb-6">
-            Hirevo minimizes risks through verified developers, milestone-based
-            payments, and automated code review systems.
-          </p>
-
-          {/* Animated Emojis One-by-One */}
-          <motion.div
-            className="flex justify-center gap-8 mt-6"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: {
-                transition: {
-                  staggerChildren: 0.4, // each emoji appears after the previous
-                },
-              },
-            }}
-          >
-            {["🛡️", "💰", "🤝"].map((icon, i) => (
-              <motion.div
-                key={i}
-                variants={{
-                  hidden: { opacity: 0, y: 40, scale: 0.5 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: {
-                      duration: 0.8,
-                      ease: "easeOut",
-                    },
-                  },
-                }}
-                whileHover={{ scale: 1.3, rotate: 5 }}
-                className="text-5xl md:text-6xl text-indigo-600 drop-shadow-sm"
-              >
-                {icon}
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-      ),
-    },
-
-    // 🟣 7 — Thank You Outro
-    {
-      content: (
-        <motion.div
-          className="relative flex flex-col items-center justify-center h-screen w-full text-center overflow-hidden px-6"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        >
-          {/* Subtle glowing radial background */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-indigo-200 via-purple-100 to-transparent blur-3xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ duration: 2 }}
-          />
-
-          {/* Floating spark particles */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <motion.span
-                key={i}
-                className="absolute rounded-full bg-indigo-500/70"
-                style={{
-                  width: `${Math.random() * 4 + 2}px`,
-                  height: `${Math.random() * 4 + 2}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: ["0%", "100%"],
-                  opacity: [0.8, 0.2, 0.8],
-                  x: [`${Math.random() * 40 - 20}%`, `${Math.random() * 40 - 20}%`],
-                }}
-                transition={{
-                  duration: 5 + Math.random() * 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Main Thank You text */}
-          <motion.h2
-            className="text-5xl sm:text-6xl md:text-7xl font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-transparent bg-clip-text drop-shadow-md mb-4"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: [0, 1], y: [50, 0], scale: [0.95, 1] }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-          >
-            Thank You!
-          </motion.h2>
-
-          <motion.p
-            className="text-lg sm:text-xl text-gray-700 mb-10 max-w-md mx-auto leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            Let’s build the future of hiring together. 🚀
-          </motion.p>
-
-          {/* Glowing credit button */}
-          <motion.button
-            className="px-8 py-3 rounded-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-semibold text-lg shadow-xl hover:scale-105 transition-all"
-            whileHover={{ scale: 1.1 }}
-            animate={{
-              opacity: [1, 0.6, 1],
-              boxShadow: [
-                "0 0 10px #6366F1",
-                "0 0 20px #A855F7",
-                "0 0 10px #6366F1",
-              ],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.5,
-              ease: "easeInOut",
-            }}
-          >
-            Made by <span className="font-bold">Ankit Maan 🚀</span>
-          </motion.button>
-        </motion.div>
-      ),
-    },
-  ];
-
-  const current = slides[slide];
 
   return (
-    <div
-  className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-100 to-purple-100 overflow-hidden relative"
-  onTouchStart={(e) => {
-    window._touchStartX = e.touches[0].clientX;
-    window._touchStartTime = Date.now();
-  }}
-   onTouchEnd={(e) => {
-  // 🛑 Ignore touches on charts or interactive elements
-  const tag = e.target.tagName.toLowerCase();
-  const classes = e.target.className?.toString() || "";
-
-  if (
-    tag === "svg" ||
-    tag === "path" ||
-    tag === "rect" ||
-    tag === "circle" ||
-    classes.includes("recharts") // recharts internal elements
-  ) {
-    return; // don't trigger slide change
-  }
-
-  const diff = e.changedTouches[0].clientX - window._touchStartX;
-  const time = Date.now() - window._touchStartTime;
-
-  // 💫 Swipe detection
-  if (Math.abs(diff) > 80 && time < 600) {
-    if (diff < 0 && slide < slides.length - 1) setSlide(slide + 1);
-    else if (diff > 0 && slide > 0) setSlide(slide - 1);
-    return;
-  }
-
-  // 👆 Single tap detection
-  if (Math.abs(diff) < 10 && time < 300) {
-    const tapX = e.changedTouches[0].clientX;
-    const screenMid = window.innerWidth / 2;
-
-    if (tapX > screenMid && slide < slides.length - 1) setSlide(slide + 1);
-    else if (tapX < screenMid && slide > 0) setSlide(slide - 1);
-  }
-}}
->
-      <AnimatePresence mode="wait">
+    <div ref={ref} className="bg-[#0B0C10] text-gray-200 font-inter overflow-x-hidden relative">
+      {/* Floating gradient blobs */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10">
         <motion.div
-          key={slide}
-          className="text-center px-6"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.8 }}
-        >
-          {current.title && (
-            <motion.h1
-              className="text-5xl font-bold text-indigo-700 mb-4"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              {current.title}
-            </motion.h1>
-          )}
-          {current.subtitle && (
-            <motion.p
-              className="text-2xl text-gray-700 mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              {current.subtitle}
-            </motion.p>
-          )}
-          {current.content}
-        </motion.div>
-      </AnimatePresence>
+          className="absolute w-[600px] h-[600px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-30"
+          style={{ y }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-r from-pink-400 via-purple-500 to-blue-500 rounded-full blur-3xl opacity-20"
+          style={{ y }}
+        />
+      </div>
 
-      {/* Navigation Buttons */}
-      {showButton && (
-        <>
-          {slide > 0 && (
-            <motion.button
-              onClick={() => setSlide((s) => Math.max(s - 1, 0))}
-              className="absolute bottom-6 left-6 bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700 transition-all"
+      {/* Hero */}
+      <section className="min-h-screen flex flex-col justify-center items-center text-center relative">
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-indigo-400 via-pink-400 to-purple-400 bg-clip-text text-transparent mb-6"
+        >
+          AI-Powered Communication Glasses
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 1 }}
+          className="text-lg md:text-2xl text-gray-400 max-w-2xl mb-8"
+        >
+          Empowering the deaf and mute community with real-time speech and gesture translation powered by AI.
+        </motion.p>
+        <motion.a
+          whileHover={{ scale: 1.1 }}
+          className="bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-pink-500/40 transition-all flex items-center gap-2"
+          href="#product"
+        >
+          Explore Now <ArrowRight size={22} />
+        </motion.a>
+      </section>
+
+      {/* Products */}
+      <section id="product" className="py-28 bg-gradient-to-b from-[#0B0C10] to-[#111217]">
+        <h2 className="text-4xl font-bold text-center mb-16 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-pink-400 to-purple-400">
+          Products
+        </h2>
+        <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto px-6">
+          {products.map((p, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.2 }}
+              viewport={{ once: true }}
+              className="relative group bg-gradient-to-br from-[#15161b] to-[#1e1f25] rounded-3xl p-8 border border-gray-700/50 shadow-lg hover:shadow-indigo-500/20 transition-all duration-500 hover:-translate-y-2"
             >
-              <ArrowLeft size={22} />
-            </motion.button>
-          )}
-          {slide < slides.length - 1 && (
-            <motion.button
-              onClick={() => setSlide((s) => Math.min(s + 1, slides.length - 1))}
-              className="absolute bottom-6 right-6 bg-indigo-600 text-white p-3 rounded-full shadow-lg hover:bg-indigo-700 transition-all"
+              <motion.div whileHover={{ scale: 1.05 }} className="overflow-hidden rounded-2xl mb-6 cursor-pointer">
+                <img
+                  onClick={() => setSelectedImg(p.img)}
+                  src={p.img}
+                  alt={p.title}
+                  className="rounded-2xl w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </motion.div>
+              <h3 className="text-2xl font-semibold mb-3 text-white">{p.title}</h3>
+              <p className="text-gray-400 mb-4">{p.desc}</p>
+              <p className="text-pink-400 font-semibold mb-4">{p.price}</p>
+              <button
+                onClick={() => handleBuy(p)}
+                className="bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-2 rounded-full font-medium hover:scale-105 transition"
+              >
+                Buy Now
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Technology */}
+      <section className="py-24 bg-gradient-to-b from-[#111217] to-[#0B0C10] text-center">
+        <h2 className="text-4xl font-bold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+          Core Technology
+        </h2>
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 text-left px-6">
+          {[
+            "🧠 AI Vision Engine interprets gestures and facial cues.",
+            "🎙️ Speech Synthesis Module generates realistic voices.",
+            "💬 Text Projection Lens for live captions.",
+            "📱 Companion App for personalization and updates.",
+          ].map((tech, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.2 }}
+              className="bg-[#16171d]/70 p-6 rounded-2xl border border-gray-700/50 backdrop-blur-md hover:border-purple-500/30 hover:shadow-purple-500/10 transition-all"
             >
-              <ArrowRight size={22} />
-            </motion.button>
-          )}
-        </>
+              {tech}
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="py-28 bg-gradient-to-b from-[#0B0C10] to-[#111217] text-center">
+        <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400 mb-6">
+          Get in Touch
+        </h2>
+        <p className="text-gray-400 text-lg mb-10">Interested in collaboration or investment?</p>
+        <a
+          href="mailto:contact@aiglasses.com"
+          className="bg-gradient-to-r from-indigo-500 to-pink-500 px-10 py-4 rounded-full text-lg font-semibold text-white shadow-lg hover:shadow-pink-500/40 transition-all"
+        >
+          contact@aiglasses.com
+        </a>
+      </section>
+
+      <footer className="py-6 text-center text-gray-500 text-sm border-t border-gray-700/40">
+        © 2025 AI Communication Glasses — Built for a Smarter Tomorrow
+      </footer>
+
+      {/* Image Preview */}
+      {selectedImg && (
+        <div
+          onClick={() => setSelectedImg(null)}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 cursor-pointer"
+        >
+          <img src={selectedImg} className="max-h-[80vh] rounded-2xl shadow-2xl" />
+        </div>
       )}
+
+      {/* Buy Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-[#15161b] p-8 rounded-3xl max-w-md w-full border border-gray-700 relative"
+          >
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X />
+            </button>
+            <img src={selectedProduct?.img} alt="" className="rounded-2xl w-full h-48 object-cover mb-6" />
+            <h3 className="text-2xl font-semibold mb-3">{selectedProduct?.title}</h3>
+            <p className="text-gray-400 mb-3">{selectedProduct?.desc}</p>
+            <p className="text-pink-400 font-semibold mb-6">{selectedProduct?.price}</p>
+            <button
+              onClick={() => {
+                setShowThankYou(true);
+                setTimeout(() => {
+                  setShowThankYou(false);
+                  setShowModal(false);
+                }, 2000);
+              }}
+              className="w-full bg-gradient-to-r from-indigo-500 to-pink-500 py-3 rounded-full font-semibold text-white hover:scale-105 transition"
+            >
+              Confirm Purchase
+            </button>
+
+            {/* Thank You Animation */}
+            {showThankYou && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 rounded-3xl"
+              >
+                <CheckCircle2 size={60} className="text-green-400 mb-4 animate-bounce" />
+                <h3 className="text-xl font-semibold text-green-300">Thank You for Your Purchase!</h3>
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
+      )}
+
+      {/* Chat Assistant */}
+      <div>
+        {!showChat && (
+          <button
+            onClick={() => setShowChat(true)}
+            className="fixed bottom-6 right-6 bg-gradient-to-r from-indigo-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-110 z-40"
+          >
+            💬
+          </button>
+        )}
+
+        {showChat && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="fixed bottom-6 right-6 bg-[#16171d] w-80 h-96 rounded-2xl border border-gray-700 shadow-2xl flex flex-col z-50"
+          >
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-700">
+              <h3 className="font-semibold text-pink-400">Aura AI Assistant</h3>
+              <button onClick={() => setShowChat(false)} className="text-gray-400 hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 text-sm">
+              {chatMessages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`p-2 rounded-xl max-w-[80%] ${
+                    m.sender === "user"
+                      ? "ml-auto bg-pink-500/20 text-pink-300"
+                      : "bg-indigo-500/20 text-indigo-300"
+                  }`}
+                >
+                  {m.text}
+                </div>
+              ))}
+            </div>
+
+            <ChatInput onSend={handleChat} />
+          </motion.div>
+        )}
+      </div>
     </div>
+  );
+}
+
+function ChatInput({ onSend }) {
+  const [msg, setMsg] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSend(msg);
+        setMsg("");
+      }}
+      className="p-3 border-t border-gray-700 flex gap-2"
+    >
+      <input
+        value={msg}
+        onChange={(e) => setMsg(e.target.value)}
+        className="flex-1 bg-transparent outline-none text-sm text-gray-200 placeholder-gray-500"
+        placeholder="Ask me anything..."
+      />
+      <button type="submit" className="text-pink-400 font-semibold hover:text-pink-300 transition">
+        Send
+      </button>
+    </form>
   );
 }
