@@ -18,7 +18,7 @@ export default function App() {
     {
       title: "Speech Model",
       desc: "AI converts gestures into natural speech for real-time conversations.",
-      img: "https://static.wixstatic.com/media/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg/v1/fill/w_800,h_800,al_c,q_85,enc_avif,quality_auto/5b4122_e09b8ce1132b4d35873ac0ca21013187~mv2.jpg",
+      img: "https://images.unsplash.com/photo-1598300055321-4d38b4dc9e4f?auto=format&fit=crop&w=800&q=80",
       price: "$399",
     },
     {
@@ -33,17 +33,26 @@ export default function App() {
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtDEyHSOb_k0enzdq8kPP1gOadbDHkdW-h8ZgGKuYAhdSMCbJTPus3Piyk&s=10",
       price: "$599",
     },
+    {
+      title: "Hawasi Glasses (On-Demand Edition)",
+      desc: "Ye H Hawasi Glasses , tum jese hawas se bhare huye logon ke liye , abe dallon , isi ka intizaar tha na , dekh kese muskuraa rha h",
+      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOoM4MRNkEQl9t3pn7PSHm94ln_Xs2Nq7SmQH3lGi_idTXVJMj6qxXFh5DMYye4w1tcsI&usqp=CAU",
+      price: "$20000",
+    },
   ];
 
+  // 🛒 Handle Buy
   const handleBuy = (product) => {
     setSelectedProduct(product);
     setShowModal(true);
   };
 
+  // 💬 Handle Chat Messages
   const handleChat = (msg) => {
-    if (!msg.trim()) return;
+    if (!msg || !msg.trim()) return;
     const newMessage = { sender: "user", text: msg };
     setChatMessages((prev) => [...prev, newMessage]);
+
     setTimeout(() => {
       const reply = {
         sender: "bot",
@@ -106,7 +115,7 @@ export default function App() {
               key={i}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.2 }}
+              transition={{ delay: i * 0.18 }}
               viewport={{ once: true }}
               className="relative group bg-gradient-to-br from-[#15161b] to-[#1e1f25] rounded-3xl p-8 border border-gray-700/50 shadow-lg hover:shadow-indigo-500/20 transition-all duration-500 hover:-translate-y-2"
             >
