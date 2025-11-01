@@ -1,7 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
-import { ArrowRight, X, CheckCircle2 } from "lucide-react";
-
+import { ArrowRight, X, CheckCircle2 } from "lucide-react";                             
 export default function App() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref });
@@ -33,16 +32,23 @@ export default function App() {
       img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtDEyHSOb_k0enzdq8kPP1gOadbDHkdW-h8ZgGKuYAhdSMCbJTPus3Piyk&s=10",
       price: "$599",
     },
-    {
-      title: "Hawasi Glasses (On-Demand Edition)",
-      desc: "Ye H Hawasi Glasses , tum jese hawas se bhare huye logon ke liye , abe dallon , isi ka intizaar tha na , dekh kese muskuraa rha h",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOoM4MRNkEQl9t3pn7PSHm94ln_Xs2Nq7SmQH3lGi_idTXVJMj6qxXFh5DMYye4w1tcsI&usqp=CAU",
-      price: "$20000",
-    },
+     {
+  title: (
+    <span className="text-white">
+      Haw
+      <span className="select-none" style={{ filter: "blur(1.6px)" }}>asi</span> Glasses (On-Demand Edition)
+    </span>
+  ),
+  desc: "Out of stock — our next-gen AI Smart Glasses are coming soon. Kindly wait for the next launch.",
+  img: "https://cdn-icons-png.flaticon.com/512/679/679922.png",
+  price: "Coming Soon",
+  outOfStock: true,
+},
   ];
 
   // 🛒 Handle Buy
   const handleBuy = (product) => {
+    if (product.outOfStock) return;
     setSelectedProduct(product);
     setShowModal(true);
   };
@@ -132,9 +138,14 @@ export default function App() {
               <p className="text-pink-400 font-semibold mb-4">{p.price}</p>
               <button
                 onClick={() => handleBuy(p)}
-                className="bg-gradient-to-r from-indigo-500 to-pink-500 text-white px-6 py-2 rounded-full font-medium hover:scale-105 transition"
+                disabled={p.outOfStock}
+                className={`px-6 py-2 rounded-full font-medium transition w-full ${
+                  p.outOfStock
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-indigo-500 to-pink-500 text-white hover:scale-105"
+                }`}
               >
-                Buy Now
+                {p.outOfStock ? "Out of Stock" : "Buy Now"}
               </button>
             </motion.div>
           ))}
@@ -195,7 +206,7 @@ export default function App() {
       )}
 
       {/* Buy Modal */}
-      {showModal && (
+      {showModal && selectedProduct && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -208,10 +219,10 @@ export default function App() {
             >
               <X />
             </button>
-            <img src={selectedProduct?.img} alt="" className="rounded-2xl w-full h-48 object-cover mb-6" />
-            <h3 className="text-2xl font-semibold mb-3">{selectedProduct?.title}</h3>
-            <p className="text-gray-400 mb-3">{selectedProduct?.desc}</p>
-            <p className="text-pink-400 font-semibold mb-6">{selectedProduct?.price}</p>
+            <img src={selectedProduct.img} alt="" className="rounded-2xl w-full h-48 object-cover mb-6" />
+            <h3 className="text-2xl font-semibold mb-3">{selectedProduct.title}</h3>
+            <p className="text-gray-400 mb-3">{selectedProduct.desc}</p>
+            <p className="text-pink-400 font-semibold mb-6">{selectedProduct.price}</p>
             <button
               onClick={() => {
                 setShowThankYou(true);
@@ -241,52 +252,65 @@ export default function App() {
       )}
 
       {/* Chat Assistant */}
-      <div>
-        {!showChat && (
-          <button
-            onClick={() => setShowChat(true)}
-            className="fixed bottom-6 right-6 bg-gradient-to-r from-indigo-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-110 z-40"
-          >
-            💬
-          </button>
-        )}
-
-        {showChat && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="fixed bottom-6 right-6 bg-[#16171d] w-80 h-96 rounded-2xl border border-gray-700 shadow-2xl flex flex-col z-50"
-          >
-            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-700">
-              <h3 className="font-semibold text-pink-400">Aura AI Assistant</h3>
-              <button onClick={() => setShowChat(false)} className="text-gray-400 hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 text-sm">
-              {chatMessages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`p-2 rounded-xl max-w-[80%] ${
-                    m.sender === "user"
-                      ? "ml-auto bg-pink-500/20 text-pink-300"
-                      : "bg-indigo-500/20 text-indigo-300"
-                  }`}
-                >
-                  {m.text}
-                </div>
-              ))}
-            </div>
-
-            <ChatInput onSend={handleChat} />
-          </motion.div>
-        )}
-      </div>
+      <ChatWidget
+        showChat={showChat}
+        setShowChat={setShowChat}
+        chatMessages={chatMessages}
+        onSend={handleChat}
+      />
     </div>
   );
 }
 
+// 💬 Chat Widget
+function ChatWidget({ showChat, setShowChat, chatMessages, onSend }) {
+  return (
+    <div>
+      {!showChat && (
+        <button
+          onClick={() => setShowChat(true)}
+          className="fixed bottom-6 right-6 bg-gradient-to-r from-indigo-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-110 z-40"
+        >
+          💬
+        </button>
+      )}
+
+      {showChat && (
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-6 right-6 bg-[#16171d] w-80 h-96 rounded-2xl border border-gray-700 shadow-2xl flex flex-col z-50"
+        >
+          <div className="flex justify-between items-center px-4 py-3 border-b border-gray-700">
+            <h3 className="font-semibold text-pink-400">Aura AI Assistant</h3>
+            <button onClick={() => setShowChat(false)} className="text-gray-400 hover:text-white">
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 text-sm">
+            {chatMessages.map((m, i) => (
+              <div
+                key={i}
+                className={`p-2 rounded-xl max-w-[80%] ${
+                  m.sender === "user"
+                    ? "ml-auto bg-pink-500/20 text-pink-300"
+                    : "bg-indigo-500/20 text-indigo-300"
+                }`}
+              >
+                {m.text}
+              </div>
+            ))}
+          </div>
+
+          <ChatInput onSend={onSend} />
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+// 💬 Chat Input
 function ChatInput({ onSend }) {
   const [msg, setMsg] = useState("");
   return (
