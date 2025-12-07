@@ -68,7 +68,7 @@ export default function Notes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#050018] to-black text-white p-6 font-[Poppins]">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,13 +84,13 @@ export default function Notes() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="flex flex-col gap-6"
         >
           {notes.map((note) => (
             <motion.div
               key={note.no}
               whileHover={{ scale: 1.03 }}
-              className="bg-white/5 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center gap-4 border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(0,198,255,0.4)] transition-all"
+              className="bg-white/5 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center gap-4 border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_30px_rgba(0,198,255,0.3)] transition-all w-full md:w-[80%] lg:w-[60%] mx-auto"
             >
               <h2
                 className={`text-center text-lg md:text-xl font-extrabold ${note.link === "#" ? "text-rose-400" : "text-white"} drop-shadow-sm`}
