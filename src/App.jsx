@@ -111,7 +111,7 @@ export default function App() {
           transition={{ duration: 2, repeat: Infinity }}
           className="text-cyan-300 font-semibold tracking-widest"
         >
-          Made with 💙
+          Coded with 💙
         </motion.p>
         <p className="text-gray-400 mt-2 text-xs md:text-sm">
           © 2025 Apex University | Designed for all devices

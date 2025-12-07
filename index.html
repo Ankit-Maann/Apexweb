@@ -6,25 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>apexweb</title>
     <script>
-      document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-      });
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
 
-      document.addEventListener('selectstart', e => e.preventDefault());
-      document.addEventListener('copy', e => e.preventDefault());
+        // Right-click disable
+        document.addEventListener("contextmenu", e => e.preventDefault());
 
-      document.addEventListener('keydown', function(e) {
-        if (
-          e.key === "F12" ||
-          (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
-          (e.ctrlKey && e.key === "U")
-        ) {
-          e.preventDefault();
-          window.history.back();
-        }
-      });
+        // Text select & copy disable
+        document.addEventListener("selectstart", e => e.preventDefault());
+        document.addEventListener("copy", e => e.preventDefault());
+
+        // DevTools hotkeys disable
+        document.addEventListener("keydown", e => {
+          if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) ||
+            (e.ctrlKey && e.key === "U")
+          ) {
+            e.preventDefault();
+            window.location.href = "about:blank";
+          }
+        });
+
+        // Console open detection
+        let lastTime = new Date();
+        setInterval(function() {
+          const devtools = /./;
+          devtools.toString = function() {
+            window.location.href = "about:blank";
+          };
+          console.log('%c', devtools);
+        }, 1000);
+
+        // Eruda / floating dev tool detection
+        setInterval(() => {
+          if (document.querySelector('[class*="eruda"]')) {
+            window.location.href = "about:blank";
+          }
+        }, 500);
+      }
     </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
