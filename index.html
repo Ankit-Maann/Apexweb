@@ -27,22 +27,13 @@
           }
         });
 
-        // Console open detection
-        let lastTime = new Date();
-        setInterval(function() {
-          const devtools = /./;
-          devtools.toString = function() {
-            window.location.href = "about:blank";
-          };
-          console.log('%c', devtools);
-        }, 1000);
-
-        // Eruda / floating dev tool detection
+        // Optional: Eruda detection
         setInterval(() => {
           if (document.querySelector('[class*="eruda"]')) {
             window.location.href = "about:blank";
           }
         }, 500);
+
       }
     </script>
   </head>
