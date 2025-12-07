@@ -13,7 +13,7 @@ export default function Notes() {
     { no: 7, topic: "Research Types", link: "https://drive.google.com/file/d/1jgYJBKSHExUf5JH6astXZNE-lidKiQzv/view?usp=sharing" },
     { no: 8, topic: "User Interviews", link: "https://drive.google.com/file/d/1l9iJohADGCnH_KrybsiSyhwazjbmV9sE/view?usp=sharing" },
     { no: 9, topic: "Surveys & Questionnaires", link: "https://drive.google.com/file/d/1DsguzxXogsnZ8p2Hjoq55LslSPPZxCRh/view?usp=sharing" },
-    { no: 10, topic: "Competitor Analysis", link: "https://drive.google.com/file/d/1FXynl1o_Ce2y2eDht0eMFcvcv1Yxlokd/view?usp=drive_link" },
+    { no: 10, topic: "Competitor Analysis", link: "https://drive.google.com/file/d/1FXyn1o_Ce2y2eDht0eMFcvcv1Yxlokd/view?usp=drive_link" },
     { no: 11, topic: "Creating User Personas", link: "https://drive.google.com/file/d/1llg4RnSRNITXPLiN9oKlYIbqeJNOCAw8/view?usp=sharing" },
     { no: 12, topic: "Customer Journey Mapping", link: "https://drive.google.com/file/d/1Yj_lowHm4FTp6XHG5NS0GAeXy47dewp9/view?usp=sharing" },
     { no: 13, topic: "Introduction to Information Architecture", link: "https://drive.google.com/file/d/1ubNZqnuTwxhZCEY_0B9o-sJSc1gbZM7I/view?usp=sharing" },
@@ -67,53 +67,50 @@ export default function Notes() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#050018] to-black text-white p-6 font-[Poppins]">
-      <div className="max-w-4xl mx-auto">
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-10"
-        >
+    <div className="min-h-screen bg-gradient-to-b from-[#050018] to-black text-white p-6 font-[Poppins] flex justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        className="w-full max-w-3xl mx-auto bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+      >
+        <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-[#00C6FF] via-[#6D00FF] to-[#FF00AA] drop-shadow-lg">
             Notes — UI & UX
           </h1>
-        </motion.header>
+        </header>
 
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col gap-6"
-        >
+        <div className="flex flex-col gap-8">
           {notes.map((note) => (
             <motion.div
               key={note.no}
               whileHover={{ scale: 1.03 }}
-              className="bg-white/5 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center gap-4 border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_30px_rgba(0,198,255,0.3)] transition-all w-full md:w-[80%] lg:w-[60%] mx-auto"
+              className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 w-full max-w-xl mx-auto flex flex-col items-center gap-6 border border-white/20 shadow-[0_5px_25px_rgba(0,0,0,0.4)] transition-all"
             >
               <h2
-                className={`text-center text-lg md:text-xl font-extrabold ${note.link === "#" ? "text-rose-400" : "text-white"} drop-shadow-sm`}
+                className={`text-center text-lg md:text-xl font-extrabold ${
+                  note.link === "#" ? "text-rose-400" : "text-white"
+                }`}
               >
-                {note.topic}
+                {note.no}. {note.topic}
               </h2>
 
               <a
                 href={note.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={note.link === "#" ? styles.staticBtn : styles.glowBtn}
+                className={`${note.link === "#" ? styles.staticBtn : styles.glowBtn} w-full max-w-[400px]`}
               >
-                {note.link === "#" ? "None" : "Open Notes"}
+                {note.link === "#" ? "Coming Soon" : "Open Notes"}
               </a>
             </motion.div>
           ))}
-        </motion.section>
+        </div>
 
         <footer className="mt-10 text-center text-gray-400 text-sm">
           © 2025 Apex University | Designed for all devices
         </footer>
-      </div>
+      </motion.div>
     </div>
   );
 }
