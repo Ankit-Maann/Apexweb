@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,Link} from "react-router-dom";
 import logo from "./assets/logo121.png";
 export default function App() {
   const navigate = useNavigate();
@@ -116,6 +116,29 @@ export default function App() {
         <p className="text-gray-400 mt-2 text-xs md:text-sm">
           © 2025 Apex University | Designed for all devices
         </p>
+
+      <div className="mt-4 flex justify-center gap-6 text-sm text-gray-400">
+  <Link
+    to="/privacy-policy"
+    className="hover:text-cyan-300 transition"
+  >
+    Privacy Policy
+  </Link>
+
+  <Link
+    to="/about"
+    className="hover:text-purple-300 transition"
+  >
+    About
+  </Link>
+
+  <Link
+    to="/contact"
+    className="hover:text-cyan-300 transition"
+  >
+    Contact
+  </Link>
+</div>
       </footer>
 
       {/* 🎨 Animation CSS */}

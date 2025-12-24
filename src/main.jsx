@@ -6,6 +6,10 @@ import App from "./App";
 import Btech from "./components/Btech";
 import Notes from "./components/Notes";
 
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+
 // Optional: simple NotFound route
 function NotFound() {
   return (
@@ -21,6 +25,9 @@ function NotFound() {
 const Root = () => (
   <BrowserRouter>
     <Routes>
+       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="/" element={<App />} />
       <Route path="/btech" element={<Btech />} />
        <Route path="/notes" element={<Notes/
