@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function Contact() {
   const [name, setName] = useState("");
@@ -34,10 +35,7 @@ export default function Contact() {
          Reach out to us directly via WhatsApp 🚀
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 gap-6"
-        >
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
           {/* Name */}
           <div>
             <label className="block text-sm mb-2 text-gray-300">
@@ -83,13 +81,27 @@ export default function Contact() {
             />
           </div>
 
-          {/* Submit */}
-          <button
+          {/* Submit Button */}
+          <motion.button
             type="submit"
-            className="mt-4 py-3 rounded-2xl font-semibold text-lg bg-gradient-to-r from-[#00C6FF] via-[#6D00FF] to-[#FF00AA] hover:scale-[1.03] transition-transform shadow-[0_0_30px_rgba(0,255,255,0.6)]"
+            whileHover={{
+              scale: 1.12,
+              boxShadow: "0 0 50px rgba(0,198,255,0.8)"
+            }}
+            whileTap={{ scale: 0.96 }}
+            className="relative w-full md:w-72 py-3.5 rounded-2xl overflow-hidden border border-cyan-300/40 backdrop-blur-xl shadow-[0_0_40px rgba(0,198,255,0.3)] font-semibold"
           >
-            Send via WhatsApp 💬
-          </button>
+            {/* Gradient background animation */}
+            <span className="absolute inset-0 bg-[linear-gradient(120deg,#00C6FF,#6D00FF,#FF00AA,#00C6FF)] bg-[length:340%_340%] animate-gradientShift opacity-90" />
+
+            {/* Neon glow overlay */}
+            <span className="absolute inset-0 bg-black/20 mix-blend-soft-light" />
+
+            {/* Button text */}
+            <span className="relative z-10 flex items-center justify-center gap-3 text-lg text-white">
+              Send via WhatsApp 💬
+            </span>
+          </motion.button>
         </form>
 
         <p className="text-xs text-gray-400 text-center mt-6">
@@ -97,6 +109,18 @@ export default function Contact() {
           message.
         </p>
       </div>
+
+      {/* Gradient animation CSS */}
+      <style>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-gradientShift {
+          animation: gradientShift 4s ease infinite;
+        }
+      `}</style>
     </div>
   );
 }
