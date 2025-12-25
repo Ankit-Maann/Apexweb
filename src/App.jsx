@@ -2,6 +2,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate ,Link} from "react-router-dom";
 import logo from "./assets/logo121.png";
+import Festival from "./pages/Festival";
+
 export default function App() {
   const navigate = useNavigate();
 
@@ -28,6 +30,8 @@ export default function App() {
   ];
 
   return (
+    <div className="relative">
+      <Festival />
     <div className="relative min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-[#050018] to-[#000000] text-white font-[Poppins] overflow-hidden">
 
       {/* 🌌 Neon Glow Blobs */}
@@ -160,5 +164,6 @@ export default function App() {
         }
       `}</style>
     </div>
+  </div>
   );
 }
